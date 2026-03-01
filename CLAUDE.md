@@ -52,3 +52,16 @@ Before generating code, check these docs:
 - `docs/naming-conventions.md` — File and variable naming
 - `docs/error-handling.md` — Error handling patterns
 - `docs/data-fetching-patterns.md` — Data fetching and mutation patterns
+
+## Git Conventions
+- Use conventional commits: feat:, fix:, refactor:, docs:, test:
+- First line: imperative mood, under 72 characters
+- Body: explain WHY, not WHAT (the diff shows WHAT)
+- Always stage specific files, never use `git add -A` blindly
+
+## Git Safety Rules
+- NEVER force push to main or develop
+- NEVER use `git reset --hard` without asking first
+- NEVER amend published commits
+- Always create a new branch for features
+- Always create PRs, never push directly to main
