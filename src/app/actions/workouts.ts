@@ -6,7 +6,13 @@ import { users, workouts } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-import { createWorkoutSchema, deleteWorkoutSchema, type CreateWorkoutInput } from "@/lib/schemas";
+import { 
+  createWorkoutSchema, 
+  deleteWorkoutSchema, 
+  updateWorkoutSchema,
+  type CreateWorkoutInput,
+  type UpdateWorkoutInput
+} from "@/lib/schemas";
 
 export type ActionResponse<T = void> =
   | { success: true; data?: T }
@@ -101,5 +107,61 @@ export async function createWorkout(
   } catch (error) {
     console.error("Failed to create workout:", error);
     return { success: false, error: "An unexpected error occurred while creating." };
+  }
+}
+
+export async function updateWorkout(
+  input: UpdateWorkoutInput
+): Promise<ActionResponse<{ id: number }>> {
+  // 1. Authenticate (Auth Pattern)
+  const { userId } = await auth();
+  if (!userId) return { success: false, error: "Unauthorized: You must be signed in." };
+
+  // 2. Validate input using Zod (Mutation Pattern)
+  const parseResult = updateWorkoutSchema.safeParse(input);
+  if (!parseResult.success) {
+    return { success: false, error: parseResult.error.issues[0].message };
+  }
+
+  try {
+    // 3. Get internal database user ID (Auth Pattern)
+    const [dbUser] = await db.select().from(users).where(eq(users.clerkUserId, userId));
+    if (!dbUser) return { success: false, error: "User profile not found" };
+
+    const durationVal = typeof parseResult.data.duration === 'number' && parseResult.data.duration > 0 
+      ? parseResult.data.duration 
+      : null;
+
+    // 4. Perform DB mutation exclusively targeting user's resource (Mutation/Auth Pattern)
+    const [updatedWorkout] = await db
+      .update(workouts)
+      .set({
+        date: parseResult.data.date,
+        type: parseResult.data.type,
+        notes: parseResult.data.notes || null,
+        duration: durationVal,
+      })
+      .where(
+        and(
+          eq(workouts.id, parseResult.data.id),
+          eq(workouts.userId, dbUser.id)
+        )
+      )
+      .returning({ id: workouts.id });
+
+    if (!updatedWorkout) {
+      return { success: false, error: "Workout not found or permission denied." };
+    }
+
+    // 5. Revalidate paths that show this data (Mutation Pattern)
+    revalidatePath("/workouts"); 
+    revalidatePath(`/workouts/${updatedWorkout.id}`);
+    revalidatePath("/"); 
+
+    // 6. Return standardized success response (Mutation Pattern)
+    return { success: true, data: { id: updatedWorkout.id } };
+  } catch (error) {
+    console.error("Failed to update workout:", error);
+    return { success: false, error: "An unexpected error occurred while updating." };
   }
 }

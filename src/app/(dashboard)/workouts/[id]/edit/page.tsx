@@ -1,5 +1,11 @@
+import { notFound } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import { eq } from "drizzle-orm";
 
-import { Breadcrumb } from '@/components/breadcrumb';
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { getWorkoutById } from "@/db/queries/workouts";
+import EditWorkoutForm from "./edit-form";
 
 interface EditWorkoutPageProps {
   params: Promise<{
@@ -7,25 +13,32 @@ interface EditWorkoutPageProps {
   }>;
 }
 
-export default async function EditWorkoutPage({ params }: EditWorkoutPageProps) {
-  const { id } = await params;
+export default async function EditWorkoutPage(props: EditWorkoutPageProps) {
+  const { id } = await props.params;
+  const workoutId = parseInt(id, 10);
 
-  return (
-    <div className="space-y-8">
-      <Breadcrumb items={[
-        { label: 'Workouts', href: '/workouts' },
-        { label: `Workout ${id}`, href: `/workouts/${id}` },
-        { label: 'Edit' }
-      ]} />
+  if (isNaN(workoutId)) {
+    notFound();
+  }
 
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Edit Workout</h1>
-        <p className="text-muted-foreground mt-2">Update this workout session</p>
-      </div>
+  // Authenticate user
+  const { userId: clerkId } = await auth();
+  if (!clerkId) {
+    notFound();
+  }
 
-      <div className="bg-card border border-border rounded-lg p-6">
-        <p className="text-muted-foreground">Edit form coming soon...</p>
-      </div>
-    </div>
-  );
+  // Get internal user ID
+  const [user] = await db.select().from(users).where(eq(users.clerkUserId, clerkId));
+  if (!user) {
+    notFound();
+  }
+
+  // Fetch workout data
+  const workout = await getWorkoutById(user.id, workoutId);
+
+  if (!workout) {
+    notFound();
+  }
+
+  return <EditWorkoutForm initialData={workout} />;
 }

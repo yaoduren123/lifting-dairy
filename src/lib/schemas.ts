@@ -16,3 +16,9 @@ export const createWorkoutSchema = z.object({
 });
 
 export type CreateWorkoutInput = z.infer<typeof createWorkoutSchema>;
+
+export const updateWorkoutSchema = z.object({
+  id: z.number().int().positive("Invalid workout ID"),
+}).merge(createWorkoutSchema);
+
+export type UpdateWorkoutInput = z.infer<typeof updateWorkoutSchema>;
