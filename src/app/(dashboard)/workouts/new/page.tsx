@@ -8,7 +8,8 @@ import { format } from "date-fns";
 import { CalendarIcon, Dumbbell, Save } from "lucide-react";
 import { toast } from "sonner";
 
-import { createWorkout, createWorkoutSchema, type CreateWorkoutInput } from "@/app/actions/workouts";
+import { createWorkout } from "@/app/actions/workouts";
+import { createWorkoutSchema, type CreateWorkoutInput } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

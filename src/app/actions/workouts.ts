@@ -1,20 +1,16 @@
 "use server";
 
-import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { users, workouts } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
+import { createWorkoutSchema, deleteWorkoutSchema, type CreateWorkoutInput } from "@/lib/schemas";
+
 export type ActionResponse<T = void> =
   | { success: true; data?: T }
   | { success: false; error: string };
-
-// Define the validation schema for input
-const deleteWorkoutSchema = z.object({
-  id: z.number().int().positive("Invalid workout ID"),
-});
 
 export async function deleteWorkout(
   id: number
@@ -62,19 +58,7 @@ export async function deleteWorkout(
   }
 }
 
-// Define the validation schema for creating a workout
-export const createWorkoutSchema = z.object({
-  date: z.date({
-    message: "A date is required.",
-  }),
-  type: z.enum(["strength", "cardio", "flexibility"], {
-    message: "Please select a valid workout type.",
-  }),
-  notes: z.string().optional(),
-  duration: z.number().int().positive("Duration must be a positive number").optional(),
-});
 
-export type CreateWorkoutInput = z.infer<typeof createWorkoutSchema>;
 
 export async function createWorkout(
   input: CreateWorkoutInput
