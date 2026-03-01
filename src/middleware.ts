@@ -6,9 +6,18 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",
 ]);
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
-    auth().protect();
+    await auth.protect();
+  }
+
+  // Forward the user's timezone from cookie to request header
+  // so server components can read it via headers()
+  const tz = req.cookies.get("timezone")?.value;
+  if (tz) {
+    const response = NextResponse.next();
+    response.headers.set("x-timezone", tz);
+    return response;
   }
 });
 

@@ -1,4 +1,3 @@
-'use client';
 
 import { Breadcrumb } from '@/components/breadcrumb';
 
