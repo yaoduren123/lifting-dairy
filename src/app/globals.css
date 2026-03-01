@@ -1,0 +1,516 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  --radius: 0.625rem;
+  /* LiftingDiary Light Theme - Fitness Oriented */
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #f8fafc;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  /* Primary: Deep Blue */
+  --primary: #0369a1;
+  --primary-foreground: #ffffff;
+  /* Secondary: Slate */
+  --secondary: #e2e8f0;
+  --secondary-foreground: #0f172a;
+  /* Muted: Neutral */
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b;
+  /* Accent: Green (Success/Progress) */
+  --accent: #16a34a;
+  --accent-foreground: #ffffff;
+  /* Destructive: Red */
+  --destructive: #dc2626;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #0284c7;
+  /* Chart colors: Blue, Green, Amber, Slate, Orange */
+  --chart-1: #0284c7;
+  --chart-2: #16a34a;
+  --chart-3: #f59e0b;
+  --chart-4: #64748b;
+  --chart-5: #ea580c;
+  /* Sidebar */
+  --sidebar: #f8fafc;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #0369a1;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #16a34a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #0284c7;
+}
+
+.dark {
+  /* LiftingDiary Dark Theme - Fitness Oriented */
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --popover: #1e293b;
+  --popover-foreground: #f1f5f9;
+  /* Primary: Bright Blue */
+  --primary: #38bdf8;
+  --primary-foreground: #0f172a;
+  /* Secondary: Slate */
+  --secondary: #334155;
+  --secondary-foreground: #f1f5f9;
+  /* Muted: Neutral */
+  --muted: #334155;
+  --muted-foreground: #cbd5e1;
+  /* Accent: Bright Green (Success/Progress) */
+  --accent: #4ade80;
+  --accent-foreground: #0f172a;
+  /* Destructive: Red */
+  --destructive: #ef4444;
+  --border: #334155;
+  --input: #334155;
+  --ring: #0ea5e9;
+  /* Chart colors: Bright Blue, Green, Amber, Slate, Orange */
+  --chart-1: #38bdf8;
+  --chart-2: #4ade80;
+  --chart-3: #fbbf24;
+  --chart-4: #cbd5e1;
+  --chart-5: #fb923c;
+  /* Sidebar */
+  --sidebar: #1e293b;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #38bdf8;
+  --sidebar-primary-foreground: #0f172a;
+  --sidebar-accent: #4ade80;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #334155;
+  --sidebar-ring: #0ea5e9;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ============================================================
+   LiftingDiary Auth Pages — Industrial Athletic Theme
+   ============================================================ */
+
+/* ---------- Page background ---------- */
+.auth-page-bg {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100svh;
+  padding: 2rem 1rem;
+  background-color: #0d0d0f;
+  overflow: hidden;
+}
+
+/* Subtle grid / diagonal stripe pattern */
+.auth-bg-pattern {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 28px,
+      rgba(255, 255, 255, 0.018) 28px,
+      rgba(255, 255, 255, 0.018) 29px
+    ),
+    linear-gradient(
+      180deg,
+      rgba(13, 13, 15, 0) 0%,
+      rgba(13, 13, 15, 0.7) 100%
+    );
+  pointer-events: none;
+}
+
+/* Amber radial glow */
+.auth-bg-glow {
+  position: absolute;
+  top: -10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(251, 146, 60, 0.12) 0%,
+    rgba(245, 101, 10, 0.05) 45%,
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: glowPulse 6s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.8; transform: translateX(-50%) scale(1); }
+  50%       { opacity: 1;   transform: translateX(-50%) scale(1.07); }
+}
+
+/* ---------- Card wrapper ---------- */
+.auth-card-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  max-width: 512px;
+  animation: cardEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+@keyframes cardEnter {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Brand header ---------- */
+.auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1.75rem;
+}
+
+.auth-brand-motto {
+  font-family: var(--font-barlow), "Barlow", system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.01em;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+.auth-brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: #ffffff;
+  margin-bottom: 0.6rem;
+  box-shadow: 0 4px 24px rgba(249, 115, 22, 0.35);
+}
+
+.auth-brand-name {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffffff;
+  line-height: 1;
+  /* Subtle emboss */
+  text-shadow: 0 0 32px rgba(249, 115, 22, 0.4);
+}
+
+.auth-brand-tagline {
+  font-family: var(--font-barlow), "Barlow", system-ui, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+/* ---------- Clerk component wrapper ---------- */
+.auth-clerk-wrapper {
+  width: 100%;
+}
+
+/* Override Clerk card styles to blend with our dark theme */
+.auth-clerk-wrapper .cl-card {
+  background: rgba(22, 22, 26, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.3),
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 40px 80px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(249, 115, 22, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  border-radius: 16px !important;
+}
+
+.auth-clerk-wrapper .cl-headerTitle {
+  display: none !important;
+}
+
+.auth-clerk-wrapper .cl-headerSubtitle {
+  display: none !important;
+}
+
+.auth-clerk-wrapper .cl-formButtonPrimary {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3) !important;
+  transition: opacity 0.2s ease, transform 0.15s ease !important;
+}
+
+.auth-clerk-wrapper .cl-formButtonPrimary:hover {
+  opacity: 0.9 !important;
+  transform: translateY(-1px) !important;
+}
+
+.auth-clerk-wrapper .cl-socialButtonsBlockButton {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  transition: background 0.2s ease, border-color 0.2s ease !important;
+}
+
+.auth-clerk-wrapper .cl-socialButtonsBlockButton:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(249, 115, 22, 0.35) !important;
+}
+
+.auth-clerk-wrapper .cl-formFieldInput {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  transition: border-color 0.2s ease !important;
+}
+
+.auth-clerk-wrapper .cl-formFieldInput:focus {
+  border-color: rgba(249, 115, 22, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12) !important;
+}
+
+.auth-clerk-wrapper .cl-formFieldLabel,
+.auth-clerk-wrapper .cl-formFieldHintText {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.auth-clerk-wrapper .cl-dividerLine {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.auth-clerk-wrapper .cl-dividerText {
+  color: rgba(255, 255, 255, 0.3) !important;
+  font-family: var(--font-barlow), "Barlow", sans-serif !important;
+}
+
+.auth-clerk-wrapper .cl-footerActionLink,
+.auth-clerk-wrapper .cl-identityPreviewEditButton {
+  color: #f97316 !important;
+}
+
+.auth-clerk-wrapper .cl-footerActionText {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.auth-clerk-wrapper .cl-internal-b3fm6y {
+  background: transparent !important;
+}
+
+/* ---------- Footer ---------- */
+.auth-footer-text {
+  margin-top: 1.25rem;
+  font-family: var(--font-barlow), "Barlow", system-ui, sans-serif;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.02em;
+}
+
+.auth-footer-link {
+  color: #f97316;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.auth-footer-link:hover {
+  color: #fb923c;
+  text-decoration: underline;
+}
+
+/* ============================================================
+   LiftingDiary Theme Utilities
+   ============================================================ */
+
+/* Success/Progress indicator */
+.success-indicator {
+  color: #16a34a;
+}
+
+.dark .success-indicator {
+  color: #4ade80;
+}
+
+.success-bg {
+  background-color: #f0fdf4;
+}
+
+.dark .success-bg {
+  background-color: #052e16;
+}
+
+/* Warning indicator */
+.warning-indicator {
+  color: #d97706;
+}
+
+.dark .warning-indicator {
+  color: #fbbf24;
+}
+
+.warning-bg {
+  background-color: #fffbeb;
+}
+
+.dark .warning-bg {
+  background-color: #451a03;
+}
+
+/* Primary accent (Deep Blue) */
+.primary-accent {
+  color: #0369a1;
+}
+
+.dark .primary-accent {
+  color: #38bdf8;
+}
+
+/* Neutral text */
+.neutral-text {
+  color: #64748b;
+}
+
+.dark .neutral-text {
+  color: #cbd5e1;
+}
+
+/* Fitness-themed gradient */
+.fitness-gradient {
+  background: linear-gradient(to right, #0284c7, #16a34a);
+}
+
+.dark .fitness-gradient {
+  background: linear-gradient(to right, #38bdf8, #4ade80);
+}
+
+/* Card with fitness theme */
+.fitness-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.fitness-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Stat card */
+.stat-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.stat-card-value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-top: 0.5rem;
+}
+
+.stat-card-change {
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+.stat-card-change.positive {
+  color: #16a34a;
+}
+
+.dark .stat-card-change.positive {
+  color: #4ade80;
+}
+
+.stat-card-change.negative {
+  color: var(--destructive);
+}
