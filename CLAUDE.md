@@ -45,3 +45,10 @@ lib/db/               # Drizzle schema & queries
 - Only add comments where logic isn't obvious
 - Don't add error handling for impossible scenarios
 
+## Documentation
+Before generating code, check these docs:
+- `docs/component-guidelines.md` — Component structure and patterns
+- `docs/database-patterns.md` — Drizzle ORM query patterns
+- `docs/naming-conventions.md` — File and variable naming
+- `docs/error-handling.md` — Error handling patterns
+- `docs/data-fetching-patterns.md` — Data fetching and mutation patterns
