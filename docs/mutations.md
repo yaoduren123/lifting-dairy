@@ -67,7 +67,7 @@ export async function createWorkout(
   // 2. Validate input
   const parseResult = createWorkoutSchema.safeParse(input);
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0].message };
+    return { success: false, error: parseResult.error.issues[0].message };
   }
 
   try {
