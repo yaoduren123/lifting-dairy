@@ -75,8 +75,8 @@ export async function getWorkoutStats(userId: number) {
     );
 
   // 2. Weekly volume
-  const [{ volume: volumeThisWeek }] = await db
-    .select({ volume: sql<number>`coalesce(sum(${sets.weight} * ${sets.reps}), 0)::integer` })
+  const volumeRows = await db
+    .select({ volume: sql<number>`sum(${sets.weight} * ${sets.reps})`.mapWith(Number) })
     .from(sets)
     .innerJoin(workoutExercises, eq(sets.workoutExerciseId, workoutExercises.id))
     .innerJoin(workouts, eq(workoutExercises.workoutId, workouts.id))
@@ -86,6 +86,7 @@ export async function getWorkoutStats(userId: number) {
         gte(workouts.date, weekStart)
       )
     );
+  const volumeThisWeek = volumeRows[0]?.volume || 0;
 
   // 3. Streak calculation
   const recentWorkouts = await db.query.workouts.findMany({

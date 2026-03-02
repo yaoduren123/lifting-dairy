@@ -261,9 +261,9 @@ export async function getVolumeForRange(
   from: Date,
   to: Date
 ): Promise<number> {
-  const [{ volume }] = await db
+  const rows = await db
     .select({
-      volume: sql<number>`coalesce(sum(${sets.weight} * ${sets.reps}), 0)::integer`,
+      volume: sql<number>`sum(${sets.weight} * ${sets.reps})`.mapWith(Number),
     })
     .from(sets)
     .innerJoin(workoutExercises, eq(sets.workoutExerciseId, workoutExercises.id))
@@ -276,7 +276,7 @@ export async function getVolumeForRange(
       )
     );
 
-  return volume;
+  return rows[0]?.volume || 0;
 }
 
 // ─── Daily Workout Frequency ──────────────────────────────────────────────────
