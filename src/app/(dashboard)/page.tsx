@@ -5,12 +5,13 @@ import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Activity, Calendar, Dumbbell, Flame, Plus, Trophy, TrendingUp } from 'lucide-react';
+import { Activity, Calendar as CalendarIcon, Dumbbell, Flame, Plus, Trophy, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
-import { getWorkouts } from '@/db/queries/workouts';
+import { getWorkouts, getCalendarWorkouts } from '@/db/queries/workouts';
 import { getDashboardStats } from '@/db/queries/stats';
 import { differenceInDays } from 'date-fns';
 import { WorkoutFrequencyChart } from '@/components/workout-frequency-chart';
+import { WorkoutCalendar } from '@/components/workout-calendar';
 import { getUserTimezone } from '@/lib/timezone';
 
 export default async function DashboardPage() {
@@ -36,9 +37,10 @@ export default async function DashboardPage() {
   // 2. Fetch all dashboard data in parallel
   const now = new Date();
   const timezone = await getUserTimezone();
-  const [stats, { workouts: recent5 }] = await Promise.all([
+  const [stats, { workouts: recent5 }, calendarWorkouts] = await Promise.all([
     getDashboardStats(dbUser.id, timezone),
     getWorkouts(dbUser.id, 1, 5),
+    getCalendarWorkouts(dbUser.id),
   ]);
 
   const { workoutsThisMonth, volumeThisWeek, streak, dailyFrequency, personalRecords } = stats;
@@ -96,7 +98,7 @@ export default async function DashboardPage() {
         <Card className="bg-card/50 backdrop-blur-sm border-border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both delay-[400ms]">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Last Workout</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
            <CardContent>
             <div className="text-2xl md:text-3xl font-bold font-[family-name:var(--font-barlow-condensed)] tracking-wide text-foreground">
@@ -178,63 +180,77 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Recent workouts */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-foreground font-[family-name:var(--font-barlow-condensed)] tracking-wide">Recent Activity</h2>
-          <Button variant="ghost" asChild className="text-orange-500 hover:text-orange-600 hover:bg-orange-500/10">
-            <Link href="/workouts">View All</Link>
-          </Button>
-        </div>
+      {/* Calendar & Recent Workouts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
         
-        {recent5.length > 0 ? (
-          <div className="grid gap-4">
-            {recent5.map(workout => (
-              <Link key={workout.id} href={`/workouts/${workout.id}`}>
-                <Card className="bg-card hover:bg-card/80 transition-colors border-border shadow-sm group">
-                  <div className="p-4 sm:p-6 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                        <Dumbbell size={20} />
-                      </div>
-                      <div>
-                        <h3 className="font-bold sm:text-lg flex items-center gap-2 capitalize font-[family-name:var(--font-barlow-condensed)] tracking-wide">
-                          {workout.type} Session
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(workout.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} • {workout.duration} min
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-xl font-[family-name:var(--font-barlow-condensed)]">{workout.workoutExercises.length}</div>
-                      <div className="text-xs text-muted-foreground">Exercises</div>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <Card className="bg-card border-border shadow-sm p-10 sm:p-14 text-center animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both delay-[500ms]">
-            <div className="flex flex-col items-center justify-center text-muted-foreground max-w-sm mx-auto">
-              <div className="w-16 h-16 bg-muted/30 flex items-center justify-center rounded-full mb-6 relative">
-                <Dumbbell size={32} className="text-foreground/70" />
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center border-2 border-background">
-                  <Plus size={14} className="text-white" />
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3 font-[family-name:var(--font-barlow-condensed)] tracking-wide">No workouts yet</h3>
-              <p className="mb-8 text-sm leading-relaxed">Your lifting journey starts here. Log your first workout to start tracking your progress and building your streak.</p>
-              <Link href="/workouts/new" className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto font-bold gap-2 bg-foreground text-background hover:bg-foreground/90 h-12 px-6 rounded-xl transition-all hover:-translate-y-0.5 shadow-md">
-                  <Plus size={18} className="stroke-[3]" />
-                  Log Your First Workout
-                </Button>
-              </Link>
+        {/* Calendar */}
+        <div className="flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both delay-[550ms]">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-bold text-foreground font-[family-name:var(--font-barlow-condensed)] tracking-wide">Workout Calendar</h2>
             </div>
-          </Card>
-        )}
+          </div>
+          <WorkoutCalendar workouts={calendarWorkouts} />
+        </div>
+
+        {/* Recent workouts */}
+        <div className="flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both delay-[600ms]">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-foreground font-[family-name:var(--font-barlow-condensed)] tracking-wide">Recent Activity</h2>
+            <Button variant="ghost" asChild className="text-orange-500 hover:text-orange-600 hover:bg-orange-500/10 h-8 px-3">
+              <Link href="/workouts">View All</Link>
+            </Button>
+          </div>
+          
+          {recent5.length > 0 ? (
+            <div className="grid gap-3">
+              {recent5.map(workout => (
+                <Link key={workout.id} href={`/workouts/${workout.id}`}>
+                  <Card className="bg-card hover:bg-muted/50 transition-colors border-border shadow-sm group">
+                    <div className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0 group-hover:bg-orange-500 group-hover:text-white transition-colors shadow-sm">
+                          <Dumbbell size={18} />
+                        </div>
+                        <div>
+                          <h3 className="font-bold sm:text-lg flex items-center gap-2 capitalize font-[family-name:var(--font-barlow-condensed)] tracking-wide">
+                            {workout.type} Session
+                          </h3>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            {new Date(workout.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} • {workout.duration} min
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-xl font-[family-name:var(--font-barlow-condensed)] text-foreground">{workout.workoutExercises.length}</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground uppercase font-semibold">Exercises</div>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <Card className="bg-card border-border shadow-sm flex-1 flex items-center justify-center p-8 text-center">
+              <div className="flex flex-col items-center justify-center text-muted-foreground max-w-sm mx-auto">
+                <div className="w-16 h-16 bg-muted/30 flex items-center justify-center rounded-full mb-6 relative">
+                  <Dumbbell size={32} className="text-foreground/70" />
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center border-2 border-background shadow-sm">
+                    <Plus size={14} className="text-white" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-3 font-[family-name:var(--font-barlow-condensed)] tracking-wide">No workouts yet</h3>
+                <p className="mb-6 text-sm leading-relaxed text-muted-foreground">Your lifting journey starts here. Log your first workout to start tracking your progress and building your streak.</p>
+                <Link href="/workouts/new" className="w-full">
+                  <Button className="w-full font-bold gap-2 bg-foreground text-background hover:bg-foreground/90 h-11 px-6 rounded-lg transition-all shadow-md">
+                    <Plus size={18} className="stroke-[3]" />
+                    Log First Workout
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

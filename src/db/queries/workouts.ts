@@ -127,3 +127,25 @@ export async function getWorkoutStats(userId: number) {
     lastWorkoutDate
   };
 }
+
+/**
+ * Get all workouts for a user, optimized for calendar view
+ */
+export async function getCalendarWorkouts(userId: number) {
+  // We fetch a simplified view of workouts for the calendar to plot them.
+  // In a massive app you'd filter by range, but for a personal diary all recent 
+  // workouts (e.g. past 2 years or simply all) is usually fine.
+  return db
+    .select({
+      id: workouts.id,
+      date: workouts.date,
+      type: workouts.type,
+      duration: workouts.duration,
+      notes: workouts.notes,
+    })
+    .from(workouts)
+    .where(eq(workouts.userId, userId))
+    .orderBy(desc(workouts.date))
+    // Capping at 1000 to prevent edge case huge payloads
+    .limit(1000);
+}
