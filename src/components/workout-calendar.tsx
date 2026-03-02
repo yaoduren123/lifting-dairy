@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { format, isSameMonth } from "date-fns";
 import { Clock, ArrowRight, CalendarDays } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -21,6 +22,7 @@ interface WorkoutCalendarProps {
 }
 
 export function WorkoutCalendar({ workouts }: WorkoutCalendarProps) {
+  const router = useRouter();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDateWorkouts, setSelectedDateWorkouts] = useState<{ date: Date; workouts: Workout[] } | null>(null);
 
@@ -85,6 +87,18 @@ export function WorkoutCalendar({ workouts }: WorkoutCalendarProps) {
         <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap hidden sm:inline-block">
           {workoutsThisMonthCount} workout{workoutsThisMonthCount !== 1 && "s"}
         </span>
+        <Button 
+          variant="secondary"
+          size="sm"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setCurrentMonth(new Date());
+          }}
+          className="h-6 px-2 text-[10px] ml-1 hidden sm:flex cursor-pointer hover:bg-primary hover:text-primary-foreground font-bold tracking-wider"
+        >
+          TODAY
+        </Button>
       </div>
     );
   };
@@ -93,7 +107,11 @@ export function WorkoutCalendar({ workouts }: WorkoutCalendarProps) {
     const dateStr = format(date, "yyyy-MM-dd");
     const dayWs = workoutsByDate[dateStr];
     if (dayWs && dayWs.length > 0) {
-      setSelectedDateWorkouts({ date, workouts: dayWs });
+      if (typeof window !== "undefined" && window.innerWidth < 640) {
+        router.push(`/workouts?date=${dateStr}`);
+      } else {
+        setSelectedDateWorkouts({ date, workouts: dayWs });
+      }
     }
   };
 
@@ -106,22 +124,29 @@ export function WorkoutCalendar({ workouts }: WorkoutCalendarProps) {
              <CalendarDays className="w-4 h-4 text-orange-500" /> 
              {format(currentMonth, "MMM yyyy")}
            </h3>
-           <span className="text-xs bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2 py-1 rounded-full font-medium">
-             {workoutsThisMonthCount} {workoutsThisMonthCount === 1 ? "workout" : "workouts"}
-           </span>
+           <div className="flex items-center gap-2">
+             <Button variant="secondary" size="sm" className="h-6 px-2 text-[10px] font-bold tracking-wider" onClick={() => setCurrentMonth(new Date())}>
+               TODAY
+             </Button>
+             <span className="text-xs bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2 py-1 rounded-full font-medium">
+               {workoutsThisMonthCount} {workoutsThisMonthCount === 1 ? "workout" : "workouts"}
+             </span>
+           </div>
          </div>
 
-        <Calendar
-          mode="single"
-          month={currentMonth}
-          onMonthChange={setCurrentMonth}
-          onDayClick={handleDayClick}
-          className="w-full h-full flex items-center justify-center [&_.rdp-month]:w-full [&_.rdp-table]:w-full [&_.rdp-day]:w-full [&_.rdp-day]:h-12 sm:[&_.rdp-day]:h-14 md:[&_.rdp-day]:h-16 [&_.rdp-day_button]:w-full [&_.rdp-day_button]:h-full [&_.rdp-day_button]:max-w-full [&_.rdp-day_button]:max-h-full [&_.rdp-table_th]:w-full [&_.rdp-table_th]:h-8"
-          components={{
-            DayButton: CustomDayButton,
-            CaptionLabel: CustomCaptionLabel,
-          }}
-        />
+        <div key={currentMonth.toISOString()} className="w-full h-full animate-in fade-in zoom-in-[0.98] duration-300">
+          <Calendar
+            mode="single"
+            month={currentMonth}
+            onMonthChange={setCurrentMonth}
+            onDayClick={handleDayClick}
+            className="w-full h-full flex items-center justify-center [&_.rdp-month]:w-full [&_.rdp-table]:w-full [&_.rdp-day]:w-full [&_.rdp-day]:h-12 sm:[&_.rdp-day]:h-14 md:[&_.rdp-day]:h-16 [&_.rdp-day_button]:w-full [&_.rdp-day_button]:h-full [&_.rdp-day_button]:max-w-full [&_.rdp-day_button]:max-h-full [&_.rdp-table_th]:w-full [&_.rdp-table_th]:h-8"
+            components={{
+              DayButton: CustomDayButton,
+              CaptionLabel: CustomCaptionLabel,
+            }}
+          />
+        </div>
         
         {/* Legend */}
         <div className="mt-4 pt-4 border-t border-border flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-muted-foreground w-full px-2">
