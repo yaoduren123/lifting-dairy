@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { DeleteWorkoutButton } from "./delete-button";
+import { AddExerciseSection } from "./add-exercise-section";
 
 interface WorkoutPageProps {
   params: Promise<{
@@ -42,6 +43,10 @@ export default async function WorkoutDetailPage(props: WorkoutPageProps) {
 
   // Fetch workout data
   const workout = await getWorkoutById(user.id, workoutId);
+
+  const availableExercises = await db.query.exercises.findMany({
+    orderBy: (exercises, { asc }) => [asc(exercises.name)]
+  });
 
   if (!workout) {
     notFound();
@@ -102,12 +107,12 @@ export default async function WorkoutDetailPage(props: WorkoutPageProps) {
         <h2 className="text-2xl font-semibold tracking-tight">Exercises</h2>
 
         {(!workout.workoutExercises || workout.workoutExercises.length === 0) ? (
-          <Card className="border-dashed border-2 bg-transparent text-center py-12">
-            <CardDescription>No exercises added to this workout yet.</CardDescription>
-            <Button variant="outline" className="mt-4" disabled>
-              Add Exercise (Coming soon)
-            </Button>
-          </Card>
+          <>
+            <Card className="border-dashed border-2 bg-transparent text-center py-12">
+              <CardDescription>No exercises added to this workout yet.</CardDescription>
+            </Card>
+            <AddExerciseSection workoutId={workout.id} availableExercises={availableExercises} />
+          </>
         ) : (
           <div className="grid gap-6">
             {workout.workoutExercises.map((we) => (
@@ -168,6 +173,7 @@ export default async function WorkoutDetailPage(props: WorkoutPageProps) {
                 </CardContent>
               </Card>
             ))}
+            <AddExerciseSection workoutId={workout.id} availableExercises={availableExercises} />
           </div>
         )}
       </div>

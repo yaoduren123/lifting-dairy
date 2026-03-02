@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { users, workouts } from "@/db/schema";
+import { users, workouts, workoutExercises, sets } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -11,7 +11,9 @@ import {
   deleteWorkoutSchema, 
   updateWorkoutSchema,
   type CreateWorkoutInput,
-  type UpdateWorkoutInput
+  type UpdateWorkoutInput,
+  addExerciseSchema,
+  type AddExerciseInput
 } from "@/lib/schemas";
 
 export type ActionResponse<T = void> =
@@ -163,5 +165,60 @@ export async function updateWorkout(
   } catch (error) {
     console.error("Failed to update workout:", error);
     return { success: false, error: "An unexpected error occurred while updating." };
+  }
+}
+
+export async function addExerciseToWorkout(
+  input: AddExerciseInput
+): Promise<ActionResponse> {
+  // 1. Authenticate
+  const { userId } = await auth();
+  if (!userId) return { success: false, error: "Unauthorized" };
+
+  // 2. Validate input
+  const parseResult = addExerciseSchema.safeParse(input);
+  if (!parseResult.success) {
+    return { success: false, error: parseResult.error.issues[0].message };
+  }
+
+  try {
+    const [dbUser] = await db.select().from(users).where(eq(users.clerkUserId, userId));
+    if (!dbUser) return { success: false, error: "User not found" };
+
+    const { workoutId, exerciseId, sets: newSets } = parseResult.data;
+
+    // Verify workout belongs to user
+    const [workout] = await db.select().from(workouts).where(and(eq(workouts.id, workoutId), eq(workouts.userId, dbUser.id)));
+    if (!workout) {
+      return { success: false, error: "Workout not found or permission denied" };
+    }
+    
+    // Perform insertions outside a transaction (or inside, but Neon serverless has limited nested transaction support, so doing sequentially is fine here, or use DB transaction)
+    await db.transaction(async (tx) => {
+      // 1. Create WorkoutExercise link
+      const [we] = await tx.insert(workoutExercises).values({
+        workoutId,
+        exerciseId,
+      }).returning({ id: workoutExercises.id });
+
+      // 2. Insert Sets
+      const setsToInsert = newSets.map((s, idx) => ({
+        workoutExerciseId: we.id,
+        setNumber: idx + 1,
+        weight: s.weight ?? null,
+        reps: s.reps ?? null,
+        rpe: s.rpe ?? null,
+      }));
+
+      await tx.insert(sets).values(setsToInsert);
+    });
+
+    revalidatePath(`/workouts/${workoutId}`);
+    revalidatePath("/");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to add exercise to workout:", error);
+    return { success: false, error: "An unexpected error occurred while adding exercise." };
   }
 }

@@ -22,3 +22,17 @@ export const updateWorkoutSchema = z.object({
 }).merge(createWorkoutSchema);
 
 export type UpdateWorkoutInput = z.infer<typeof updateWorkoutSchema>;
+
+export const setSchema = z.object({
+  weight: z.number().nonnegative().optional(),
+  reps: z.number().int().nonnegative().optional(),
+  rpe: z.number().min(0).max(10).optional(),
+});
+
+export const addExerciseSchema = z.object({
+  workoutId: z.number().int().positive(),
+  exerciseId: z.number().int().positive(),
+  sets: z.array(setSchema).min(1, "At least one set is required"),
+});
+
+export type AddExerciseInput = z.infer<typeof addExerciseSchema>;
